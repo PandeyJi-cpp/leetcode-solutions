@@ -1,137 +1,78 @@
-🚀 Three Way Partitioning (Range Based)
+🚀 Minimum Swaps to Group All 1's Together II (Circular)
 📌 Problem
 
-Given an array and two values a and b,
-rearrange the array such that:
+👉 Minimum Swaps to Group All 1's Together II
 
-Elements less than a come first
-Elements in range [a, b] come next
-Elements greater than b come last
+Given a circular binary array, find the minimum swaps required to group all 1’s together.
 
-👉 Order inside groups matter nahi karta, bas grouping sahi honi chahiye.
+💡 Approach (Sliding Window + Circular ⚔️)
+🧠 Key Idea:
+Count total number of 1’s → this will be our window size
+Use a sliding window of size = ones
+Count number of 0’s (bad elements) in each window
+Minimum 0’s = minimum swaps required
+🔄 Circular Trick
 
-💡 Approach (Vector / Bucket Method)
-3 vectors use kiye:
-v1 → elements < a
-v2 → elements [a, b]
-v3 → elements > b
-Pehle array traverse karke elements ko correct bucket me daal diya
-Phir sabko merge karke original array me daal diya
+👉 Since array is circular:
+
+Traverse till n + ones
+Use i % n to wrap around
 💻 Code (C++)
 class Solution {
 public:
-    void threeWayPartition(vector<int>& arr, int a, int b) {
+    int minSwaps(vector<int>& nums) {
         
-        vector<int> v1, v2, v3;
+        int n = nums.size();
 
-        // Step 1: Divide into 3 groups
-        for (int i = 0; i < arr.size(); i++) {
-            if (arr[i] < a) {
-                v1.push_back(arr[i]);
-            }
-            else if (arr[i] >= a && arr[i] <= b) {
-                v2.push_back(arr[i]);
-            }
-            else {
-                v3.push_back(arr[i]);
-            }
+        // Step 1: Count total 1's
+        int ones = 0;
+        for (int x : nums) {
+            if (x == 1) ones++;
         }
 
-        // Step 2: Merge back into original array
-        int i = 0;
+        // Edge case: no 1's
+        if (ones == 0) return 0;
 
-        for (int x : v1) {
-            arr[i++] = x;
+        // Step 2: First window
+        int currZero = 0;
+        for (int i = 0; i < ones; i++) {
+            if (nums[i] == 0) currZero++;
         }
-        for (int x : v2) {
-            arr[i++] = x;
+
+        int ans = currZero;
+
+        // Step 3: Sliding window (circular)
+        for (int i = ones; i < n + ones; i++) {
+
+            // Remove left element
+            if (nums[i - ones] == 0) currZero--;
+
+            // Add new element (circular index)
+            if (nums[i % n] == 0) currZero++;
+
+            ans = min(ans, currZero);
         }
-        for (int x : v3) {
-            arr[i++] = x;
-        }
+
+        return ans;
     }
 };
-⏱️ Time Complexity
-Traversing array: O(n)
-Merging back: O(n)
 
-👉 Total TC = O(n) ⚡
-
-💾 Space Complexity
-Extra vectors used (v1, v2, v3)
-
-👉 SC = O(n) 🧠
-
-🔥 Key Insight
-
-“Divide elements into 3 buckets based on condition and then merge them back.”
-
-//Second Approach (In Place - DNF Algorithm)
-
-🚀 Three Way Partitioning (Dutch National Flag - In Place)
-📌 Problem
-
-Given an array and two values a and b, rearrange the array such that:
-
-Elements < a come first
-Elements in range [a, b] come next
-Elements > b come last
-
-👉 In-place karna hai (no extra space)
-
-💡 Approach (DNF Algorithm ⚔️)
-
-We use 3 pointers:
-
-left → boundary of < a
-mid → current element
-right → boundary of > b
-🎯 Idea:
-< a → left side push
-> b → right side push
-[a, b] → beech me rehne do
-💻 Code (C++)
-class Solution {
-public:
-    void threeWayPartition(vector<int>& arr, int a, int b) {
-        
-        int left = 0;
-        int mid = 0;
-        int right = arr.size() - 1;
-
-        while (mid <= right) {
-
-            // Case 1: Element < a → left side
-            if (arr[mid] < a) {
-                swap(arr[left], arr[mid]);
-                left++;
-                mid++;
-            }
-
-            // Case 2: Element in range [a, b] → middle
-            else if (arr[mid] >= a && arr[mid] <= b) {
-                mid++;
-            }
-
-            // Case 3: Element > b → right side
-            else {
-                swap(arr[mid], arr[right]);
-                right--;
-                // mid stays here
-            }
-        }
-    }
-};
+/*
+How to slide window.                                                                                                     ---   
+decrease size from strting and increase size in ending.                                                                    |---->THESE ARE SOME KEY CONCEPTS OF SLIDING WINDOW TRICK.
+=>remove element in left if(nums[i-window_size]==bad element) bad_element_count--;                                         |
+=>add element in right if(nums[i]==bad element)bad_element_count++; || if array is circular then here index would be i%n.---
+*/
 ⏱️ Time Complexity
 
 👉 O(n) ⚡
 
-Single pass through array
+Single pass sliding window
 💾 Space Complexity
 
 👉 O(1) 🧠
 
-No extra space used (in-place)
+No extra space used
 🔥 Key Insight
 
-“Push elements into their correct zone using 3 pointers in one pass.”
+“Best window wo hai jisme sabse kam 0’s ho — wahi minimum swaps hai”
